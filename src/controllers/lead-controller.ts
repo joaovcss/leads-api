@@ -1,15 +1,43 @@
 import type { Handler } from "express";
 import { prisma } from "../lib/prisma.ts";
 import { HttpError } from "../errors/HttpError.ts";
-import { CreateLeadRequestSchema, UpdateLeadRequestSchema } from "./schemes/leads-request-schemes.ts";
+import { CreateLeadRequestSchema, GetLeadsRequestSchema, UpdateLeadRequestSchema } from "./schemes/leads-request-schemes.ts";
+import type { Prisma } from "../generated/prisma/client.ts";
 
 export class leadsController {
 
   //GET /leads
   index: Handler = async (req, res, next) => {
     try {
-      const leads = await prisma.lead.findMany()
-      res.json(leads)
+      const query = GetLeadsRequestSchema.parse(req.query)
+      const { page = "1", pageSize = "10", name, status, sortBy = "name", order = "asc" } = query
+
+      const pageNumber = Number(page)
+      const pageSizeNumber = Number(pageSize)
+
+      const where: Prisma.LeadWhereInput = {}
+
+      if(name) where.name = { contains: name, mode: "insensitive" }
+      if(status) where.status = status
+
+      const leads = await prisma.lead.findMany({
+        where,
+        skip: (pageNumber - 1) * pageSizeNumber,
+        take: pageSizeNumber,
+        orderBy: { [sortBy]: order }
+      })
+
+      const total = await prisma.lead.count({ where })
+
+      res.json({
+        data: leads,
+        meta: {
+          page: pageNumber,
+          pageSize: pageSizeNumber,
+          total,
+          totalPages: Math.ceil(total / pageSizeNumber)
+        }
+      })
     } catch (error) {
       next(error)
     }
