@@ -16,7 +16,7 @@ datasource db {
 model Group {
   id          Int     @id @default(autoincrement())
   name        String  @unique @db.VarChar(255)
-  description String?
+  description String? @default("")
   leads       Lead[]  @relation("GroupLeads")
 }
 
@@ -46,7 +46,7 @@ enum LeadStatus {
 model Campaign {
   id          Int            @id @default(autoincrement())
   name        String         @db.VarChar(255)
-  description String?
+  description String?        @default("")
   startDate   DateTime       @default(now())
   endDate     DateTime?
   leads       LeadCampaign[]
