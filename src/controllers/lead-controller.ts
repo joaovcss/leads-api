@@ -85,6 +85,17 @@ export class leadsController {
       })
       if(!lead) throw new HttpError(404, "lead not found")
 
+      if(lead.status === "New" && body.status !== undefined && body.status !== "Contacted"){
+        throw new HttpError(400, "a new lead must be contacted before updating the status to other values")
+      }
+
+      if(body.status && body.status === "Archived"){
+        const now = new Date()
+        const diffTime = Math.abs(now.getTime() - lead.updatedAt.getTime())
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        if(diffDays < 180) throw new HttpError(400, "a lead only can be archived after 6 months of inactivity")
+      }
+
       const dataToUpdate = Object.fromEntries(
         Object.entries(body).filter(([, value]) => value !== undefined)
       )
