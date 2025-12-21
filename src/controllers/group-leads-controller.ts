@@ -23,16 +23,15 @@ export class groupLeadsController {
 
       const leads = await prisma.lead.findMany({
         where,
+        orderBy: { [sortBy]: order},
         skip: (pageNumber - 1) * pageSizeNumber,
         take: pageSizeNumber,
-        orderBy: { [sortBy]: order},
         include: {
           groups: {
             select: {
               id: true,
               name: true,
               description: true,
-
             }
           }
         }
@@ -76,7 +75,7 @@ export class groupLeadsController {
 
   removeLead: Handler = async (req, res, next) => {
     try {
-      const removeLead = await prisma.group.update({
+      const updatedGroup = await prisma.group.update({
         where: { id: Number(req.params.groupdId)},
         data: {
           leads: {
@@ -85,7 +84,7 @@ export class groupLeadsController {
         },
         include: { leads: true }
       })
-      res.json(removeLead)
+      res.json(updatedGroup)
     } catch (error) {
       next(error)
     }
