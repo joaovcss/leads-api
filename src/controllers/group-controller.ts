@@ -1,14 +1,15 @@
 import type { Handler } from "express";
-import { prisma } from "../lib/prisma.ts";
 import { HttpError } from "../errors/HttpError.ts";
 import { CreateGroupRequestSchema, UpdateGroupRequestSchema } from "./schemes/groups-request-schemes.ts";
+import type { GroupsRepository } from "../repositories/groups-repository.ts";
 
 export class groupsController {
+  constructor(private readonly groupsRepository: GroupsRepository) { }
 
   //GET /groups
   index: Handler = async (req, res, next) => {
     try {
-      const groups = await prisma.group.findMany()
+      const groups = await this.groupsRepository.find()
       res.json(groups)
     } catch (error) {
       next(error)
@@ -18,14 +19,10 @@ export class groupsController {
   //GET /groups/:id
   show: Handler = async (req, res, next) => {
     try {
-      const group = await prisma.group.findUnique({
-      where: { id: Number(req.params.id) },
-      include: { leads: true }
-    })
-
-    if(!group) throw new HttpError(404, "group not found")
-
-    res.json(group)
+      const { id } = req.params
+      const group = await this.groupsRepository.findById(Number(id))
+      if(!group) throw new HttpError(404, "group not found")
+      res.json(group)
     } catch (error) {
       next(error)
     }
@@ -35,10 +32,7 @@ export class groupsController {
   create: Handler = async (req, res, next) => {
     try {
       const body = CreateGroupRequestSchema.parse(req.body)
-
-      if(body.description === undefined) body.description = ""
-
-      const newGroup = await prisma.group.create({ data: body })
+      const newGroup = await this.groupsRepository.create(body)
       res.status(201).json(newGroup)
     } catch (error) {
       next(error)
@@ -49,18 +43,9 @@ export class groupsController {
   update: Handler = async (req, res, next) => {
     try {
       const body = UpdateGroupRequestSchema.parse(req.body)
-      const group = await prisma.group.findUnique({ where: { id: Number(req.params.id) }})
-      
-      if(!group) throw new HttpError(404, "group not found")
-
-      const dataToUpdate = Object.fromEntries(
-        Object.entries(body).filter(([, value]) => value !== undefined)
-      )
-      
-      const updatedGroup = await prisma.group.update({
-        data: dataToUpdate,
-        where: { id: Number(req.params.id)}
-      })
+      const { id } = req.params
+      const updatedGroup = await this.groupsRepository.update(Number(id), body)
+      if(!updatedGroup) throw new HttpError(404, "group not found")
       res.json(updatedGroup)
     } catch (error) {
       next(error)
@@ -69,15 +54,8 @@ export class groupsController {
 
   //DELETE /groups/:id
   delete: Handler = async (req, res, next) => {
-    const group = await prisma.group.findUnique({
-      where: { id: Number(req.params.id) }
-    })
-
-    if(!group) throw new HttpError(404, "group not found")
-
-    const deletedGroup = await prisma.group.delete({
-      where: { id: Number(req.params.id) }
-    })
+    const deletedGroup = await this.groupsRepository.deleteById(Number(req.params.id))
+    if(!deletedGroup) throw new HttpError(404, "group not found")
     res.json({ deletedGroup })
   }
 }
