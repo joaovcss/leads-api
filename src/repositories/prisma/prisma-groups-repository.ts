@@ -1,0 +1,33 @@
+import type { Group } from "../../generated/prisma/client.ts";
+import { prisma } from "../../lib/prisma.ts";
+import type { CreateGroupAttributes, GroupsRepository } from "../groups-repository.ts";
+
+export class PrismaGroupsRepository implements GroupsRepository{
+  async find(): Promise<Group[]> {
+    return prisma.group.findMany()
+  }
+
+  async findById(id: number): Promise<Group | null> {
+    return prisma.group.findUnique({
+      where: { id },
+      include: {
+        leads: true
+      }
+    })
+  }
+
+  async create(attributes: CreateGroupAttributes): Promise<Group>{
+    return prisma.group.create({ data: attributes })
+  }
+
+  async update(id: number, attributes: Partial<CreateGroupAttributes>): Promise<Group | null>{
+    return prisma.group.update({
+      data: attributes,
+      where: { id }
+    })
+  }
+
+  async deleteById(id: number): Promise<Group | null>{
+    return prisma.group.delete({ where: { id }})
+  }
+}
