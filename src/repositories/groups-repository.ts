@@ -11,6 +11,4 @@ export interface GroupsRepository {
   create: (attributes: CreateGroupAttributes) => Promise<Group>
   update: (id: number, attributes: Partial<CreateGroupAttributes>) => Promise<Group | null>
   deleteById: (id: number) => Promise<Group | null>
-  addLead: (groupId: number, leadId: number) => Promise<Group>
-  removeLead: (groupId: number, leadId: number) => Promise<Group>
 }
