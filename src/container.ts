@@ -5,13 +5,15 @@ import { campaignLeadsController } from "./controllers/campaign-leads-controller
 import { groupLeadsController } from "./controllers/group-leads-controller.ts"
 import { PrismaLeadRepository } from "./repositories/prisma/prisma-lead-repository.ts"
 import { PrismaGroupsRepository } from "./repositories/prisma/prisma-groups-repository.ts"
+import { PrismaCampaignsRepository } from "./repositories/prisma/prisma-campaigns-repository.ts"
 
 export const leadsRepository = new PrismaLeadRepository()
 export const LeadsController = new leadsController(leadsRepository)
 
 export const groupsRepository = new PrismaGroupsRepository()
 export const GroupController = new groupsController(groupsRepository)
+export const GroupLeadsController = new groupLeadsController(groupsRepository, leadsRepository)
 
-export const CampaingController = new campaignController()
+export const campaignsRepository = new PrismaCampaignsRepository()
+export const CampaingController = new campaignController(campaignsRepository)
 export const CampaigLeadsController = new campaignLeadsController()
-export const GroupLeadsController = new groupLeadsController()
