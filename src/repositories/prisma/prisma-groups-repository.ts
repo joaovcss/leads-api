@@ -21,6 +21,8 @@ export class PrismaGroupsRepository implements GroupsRepository{
   }
 
   async update(id: number, attributes: Partial<CreateGroupAttributes>): Promise<Group | null>{
+    const groupExists = await prisma.group.findUnique({ where: { id }})
+    if(!groupExists) return null
     return prisma.group.update({
       data: attributes,
       where: { id }
@@ -28,6 +30,8 @@ export class PrismaGroupsRepository implements GroupsRepository{
   }
 
   async deleteById(id: number): Promise<Group | null>{
+    const groupExists = await prisma.group.findUnique({ where: { id }})
+    if(!groupExists) return null
     return prisma.group.delete({ where: { id }})
   }
 
