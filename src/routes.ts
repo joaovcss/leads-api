@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { CampaigLeadsController, CampaingController, GroupController, GroupLeadsController, LeadsController } from "./container.ts"
+import { CampaignLeadsController, CampaingController, GroupController, GroupLeadsController, LeadsController } from "./container.ts"
 
 const router = Router()
 
@@ -30,10 +30,10 @@ router.put("/campaigns/:id", CampaingController.update)
 router.delete("/campaigns/:id", CampaingController.delete)
 
 // Leads management in campaigns
-router.get("/campaigns/:campaignId/leads", CampaigLeadsController.getLeads)
-router.post("/campaigns/:campaignId/leads", CampaigLeadsController.addLead)
-router.put("/campaigns/:campaignId/leads/:leadId", CampaigLeadsController.updateLeadStatus)
-router.delete("/campaigns/:campaignId/leads/:leadId", CampaigLeadsController.removeLead)
+router.get("/campaigns/:campaignId/leads", CampaignLeadsController.getLeads)
+router.post("/campaigns/:campaignId/leads", CampaignLeadsController.addLead)
+router.put("/campaigns/:campaignId/leads/:leadId", CampaignLeadsController.updateLeadStatus)
+router.delete("/campaigns/:campaignId/leads/:leadId", CampaignLeadsController.removeLead)
 
 
 //Server status check
