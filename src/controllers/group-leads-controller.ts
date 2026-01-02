@@ -1,13 +1,9 @@
 import type { Handler } from "express";
 import { AddGroupLeadsRequestSchema, GetGroupLeadsRequestSchema } from "./schemes/groups-request-schemes.ts";
-import type { LeadsRepository, LeadWhereParams } from "../repositories/leads-repository.ts";
-import type { GroupsRepository } from "../repositories/groups-repository.ts";
+import type { GroupsService } from "../services/groups-service.ts";
 
 export class groupLeadsController {
-  constructor(
-    private readonly groupsRepository: GroupsRepository,
-    private readonly leadsRepository: LeadsRepository
-  ) { }
+  constructor(private readonly groupsServices: GroupsService) { }
 
   showLeads: Handler = async (req, res, next) => {
     try {
@@ -15,32 +11,15 @@ export class groupLeadsController {
       const query = GetGroupLeadsRequestSchema.parse(req.query)
       const { page = "1", pageSize = "10", name, sortBy = "name", order = "asc" } = query
 
-      const limit = Number(pageSize)
-      const offset = (Number(page) - 1) * limit
-
-      const where: LeadWhereParams = { groupId }
-
-      if(name) where.name = { like: name, mode: "insensitive" }
-
-      const leads = await this.leadsRepository.find({
-        where,
-        sortBy,
-        order,
-        limit,
-        offset,
-        include: { groups: true }
-      })
-
-      const total = await this.leadsRepository.count(where)
-      res.json({
-        leads,
-        meta: {
-          page: Number(page),
-          pageSize: limit,
-          total,
-          totalPages: Math.ceil(total / limit)
+      const result = await this.groupsServices.getAllGroupLeads(
+        groupId,
+        {
+          ...query,
+          page: +page,
+          pageSize: +pageSize
         }
-      })
+      )
+      res.json(result)
     } catch (error) {
       next(error)
     }
@@ -49,9 +28,8 @@ export class groupLeadsController {
   addLead: Handler = async (req, res, next) => {
     try {
       const { leadId } = AddGroupLeadsRequestSchema.parse(req.body)
-      const { groupId } = req.params
-      const updatedGroup = await this.groupsRepository.addLead(Number(groupId), leadId)
-
+      const groupId = Number(req.params.groupId)
+      const updatedGroup = await this.groupsServices.addLeadToGroup(groupId,leadId)
       res.status(201).json(updatedGroup)
     } catch (error) {
       next(error)
@@ -60,9 +38,9 @@ export class groupLeadsController {
 
   removeLead: Handler = async (req, res, next) => {
     try {
-      const { leadId } = req.params
-      const { groupId } = req.params
-      const updatedGroup = await this.groupsRepository.removeLead(Number(groupId), Number(leadId))
+      const groupId = Number(req.params.groupId)
+      const leadId = Number(req.params.leadId)
+      const updatedGroup = await this.groupsServices.removeLeadFromGroup(groupId, leadId)
       res.json(updatedGroup)
     } catch (error) {
       next(error)

@@ -1,7 +1,5 @@
 import type { Handler } from "express";
-import { HttpError } from "../errors/HttpError.ts";
 import { CreateGroupRequestSchema, UpdateGroupRequestSchema } from "./schemes/groups-request-schemes.ts";
-import type { GroupsRepository } from "../repositories/groups-repository.ts";
 import type { GroupsService } from "../services/groups-service.ts";
 
 export class groupsController {

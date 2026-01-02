@@ -15,11 +15,11 @@ export const campaignsRepository = new PrismaCampaignsRepository()
 export const groupsRepository = new PrismaGroupsRepository()
 
 export const leadsService = new LeadsService(leadsRepository)
-export const groupsService = new GroupsService(groupsRepository)
+export const groupsService = new GroupsService(groupsRepository, leadsRepository)
 export const campaignsServices = new CampaignsService(campaignsRepository, leadsRepository)
 
 export const LeadsController = new leadsController(leadsService)
 export const GroupController = new groupsController(groupsService)
-export const GroupLeadsController = new groupLeadsController(groupsRepository, leadsRepository)
+export const GroupLeadsController = new groupLeadsController(groupsService)
 export const CampaingController = new campaignController(campaignsServices)
 export const CampaignLeadsController = new campaignLeadsController(campaignsServices)

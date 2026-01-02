@@ -1,4 +1,4 @@
-import { HttpError } from "../../errors/HttpError.ts";
+
 import type { Campaign } from "../../generated/prisma/client.ts";
 import { prisma } from "../../lib/prisma.ts";
 import type { AddLeadToCampaignAttributes, CampaignRepository, CreateCampaignAttributes, LeadCampaignStatus } from "../campaigns-repository.ts";
