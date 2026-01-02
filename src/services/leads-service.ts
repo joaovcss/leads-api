@@ -21,7 +21,7 @@ export class LeadsService {
   constructor (private readonly leadsRepository: LeadsRepository) { }
 
   async getAllLeadsPaginated(params: GetLeadsWithPaginationParams) {
-      const { page = 1, pageSize = 10, name, status, sortBy, order } = params
+      const { page = 1, pageSize = 10, name, status, sortBy = "name", order = "asc" } = params
 
       const limit = pageSize
       const offset = (page - 1) * limit
