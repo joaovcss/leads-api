@@ -1,5 +1,4 @@
 import type { Handler } from "express";
-import { type LeadStatus } from "../generated/prisma/client.ts";
 import { AddGroupLeadsRequestSchema, GetGroupLeadsRequestSchema } from "./schemes/groups-request-schemes.ts";
 import type { LeadsRepository, LeadWhereParams } from "../repositories/leads-repository.ts";
 import type { GroupsRepository } from "../repositories/groups-repository.ts";
@@ -22,7 +21,6 @@ export class groupLeadsController {
       const where: LeadWhereParams = { groupId }
 
       if(name) where.name = { like: name, mode: "insensitive" }
-      if(status) where.status = status as LeadStatus
 
       const leads = await this.leadsRepository.find({
         where,

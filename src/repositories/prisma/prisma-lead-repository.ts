@@ -1,23 +1,28 @@
-import type { Lead } from "../../generated/prisma/client.ts";
+import type { Lead, Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../lib/prisma.ts";
 import type { CreateLeadAttributes, FindLeadsParams, LeadsRepository, LeadWhereParams } from "../leads-repository.ts";
 
 export class PrismaLeadRepository implements LeadsRepository {
   async find(params: FindLeadsParams) : Promise<Lead[]>{
-    return prisma.lead.findMany({
-      where: {
-        name: {
-          contains: params.where?.name?.like,
-          equals: params.where?.name?.equals,
-          mode: params.where?.name?.mode
-        },
-        status: params.where?.status,
-        groups: {
-          is: {
-            id: params.where?.groupId
-          }
-        }
+    let where: Prisma.LeadWhereInput = {
+      name: {
+        contains: params.where?.name?.like,
+        equals: params.where?.name?.equals,
+        mode: params.where?.name?.mode
       },
+      status: params.where?.status
+    }
+
+    if(params.where?.groupId) {
+      where.groups = { is: { id: params.where.groupId } }
+    }
+
+    if(params.where?.campaignId){
+      where.campaigns = { some: { campaignId: params.where.campaignId } }
+    }
+
+    return prisma.lead.findMany({
+      where,
       orderBy: { [params.sortBy ?? "name"]: params.order },
       skip: params.offset,
       take: params.limit,
@@ -39,21 +44,24 @@ export class PrismaLeadRepository implements LeadsRepository {
   }
 
   async count(where: LeadWhereParams): Promise<number>{
-    return prisma.lead.count({ 
-      where : {
-        name: {
-          contains: where?.name?.like,
-          equals: where?.name?.equals,
-          mode: where?.name?.mode
-        },
-        status: where?.status,
-        groups: {
-          is: {
-            id: where?.groupId
-          }
-        }
-      }
-    })
+    let prismaWhere: Prisma.LeadWhereInput = {
+      name: {
+        contains: where?.name?.like,
+        equals: where?.name?.equals,
+        mode: where?.name?.mode
+      },
+      status: where?.status
+    }
+
+    if(where?.groupId) {
+      prismaWhere.groups = { is: { id: where.groupId } }
+    }
+
+    if(where?.campaignId) {
+      prismaWhere.campaigns = { some: { campaignId: where.campaignId } }
+    }
+
+    return prisma.lead.count({ where: prismaWhere })
   }
 
   async create(attributes: CreateLeadAttributes): Promise<Lead>{
