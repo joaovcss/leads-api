@@ -1,6 +1,7 @@
+import { HttpError } from "../../errors/HttpError.ts";
 import type { Campaign } from "../../generated/prisma/client.ts";
 import { prisma } from "../../lib/prisma.ts";
-import type { CampaignRepository, CreateCampaignAttributes, LeadCampaignStatus } from "../campaigns-repository.ts";
+import type { AddLeadToCampaignAttributes, CampaignRepository, CreateCampaignAttributes, LeadCampaignStatus } from "../campaigns-repository.ts";
 
 export class PrismaCampaignsRepository implements CampaignRepository {
   async find(): Promise<Campaign[]> {
@@ -10,30 +11,49 @@ export class PrismaCampaignsRepository implements CampaignRepository {
   async findById(id: number): Promise<Campaign | null> {
     return prisma.campaign.findUnique({ 
       where: { id },
-      include: { leads: true }
+      include: { 
+        leads: {
+          include: { lead: true }
+      }}
     })
   }
   async create(attributes: CreateCampaignAttributes): Promise<Campaign> {
-    return prisma.campaign.create({
-      data: attributes
-    })
+    return prisma.campaign.create({ data: attributes })
   }
   async update(id: number, attributes: Partial<CreateCampaignAttributes>): Promise<Campaign | null> {
+    const campaignExists = await prisma.campaign.findUnique({ where: { id }})
+    if(!campaignExists) return null
     return prisma.campaign.update({
       where: { id },
       data: attributes
     })
   }
   async delete(id: number): Promise<Campaign | null> {
-    return prisma.campaign.delete({ where: { id }, include: { leads: true }})
+    const campaignExists = await prisma.campaign.findUnique({ where: { id }})
+    if(!campaignExists) return null
+    return prisma.campaign.delete({ where: { id } })
   }
-  async addLead(leadId: number, campaignId: number): Promise<Campaign> {
-
+  async addLead(attributes: AddLeadToCampaignAttributes): Promise<void> {
+    await prisma.leadCampaign.create({
+      data: attributes
+    })
   }
-  async updateLeadStatus(leadId: number, campaignId: number, status: LeadCampaignStatus): Promise<Campaign> {
-
+  async updateLeadStatus(attributes: AddLeadToCampaignAttributes): Promise<void> {
+    await prisma.leadCampaign.update({
+      data: { status: attributes.status},
+        where: {
+          leadId_campaignId: {
+            campaignId: attributes.campaignId,
+            leadId: attributes.leadId
+          }
+        }
+      })
   }
-  async removeLead(leadId: number, campaignId: number): Promise<Campaign> {
-
+  async removeLead(leadId: number, campaignId: number): Promise<void> {
+    await prisma.leadCampaign.delete({
+        where: {
+          leadId_campaignId: { campaignId, leadId }
+        }
+      })
   }
 }
