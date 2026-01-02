@@ -5,6 +5,7 @@ import type { GroupsService } from "../services/groups-service.ts";
 export class groupLeadsController {
   constructor(private readonly groupsServices: GroupsService) { }
 
+  //GET groups/:groupId/leads
   showLeads: Handler = async (req, res, next) => {
     try {
       const groupId = Number(req.params.groupId)
@@ -25,6 +26,7 @@ export class groupLeadsController {
     }
   }
 
+  //POST /groups/:groupId/leads
   addLead: Handler = async (req, res, next) => {
     try {
       const { leadId } = AddGroupLeadsRequestSchema.parse(req.body)
@@ -36,6 +38,7 @@ export class groupLeadsController {
     }
   }
 
+  //DELETE /groups/:groupId/leads/:leadId
   removeLead: Handler = async (req, res, next) => {
     try {
       const groupId = Number(req.params.groupId)

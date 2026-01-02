@@ -32,6 +32,7 @@ export class leadsController {
     }
   }
 
+  //POST /leads
   create: Handler = async (req, res, next) => {
     try {
       const body = CreateLeadRequestSchema.parse(req.body)
@@ -42,6 +43,7 @@ export class leadsController {
     }
   }
 
+  //PUT /leads/:id
   update: Handler = async (req, res, next) => {
     try {
       const id = Number(req.params.id)
@@ -53,6 +55,7 @@ export class leadsController {
     }
   }
 
+  //DELETE /leads/:id
   delete: Handler = async (req, res, next) => {
     try {
       const id = Number(req.params.id)

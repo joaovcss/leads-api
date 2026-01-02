@@ -7,6 +7,7 @@ import type { CampaignsService } from "../services/campaigns-service.ts";
 export class campaignLeadsController {
   constructor(private readonly campaignsServices: CampaignsService) {}
   
+  //GET /campaigns/:id/leads
   getLeads: Handler = async (req, res, next) => {
     try {
       const campaignId = Number(req.params.campaignId)
@@ -27,6 +28,7 @@ export class campaignLeadsController {
     }
   }
 
+  //POST campaigns/:campaignId/leads
   addLead: Handler = async (req, res, next) => {
     try {
       const { leadId, status = "New"} = AddLeadRequestSchema.parse(req.body)
@@ -38,6 +40,7 @@ export class campaignLeadsController {
     }
   }
 
+  //PUT campaigns/:campaignId/leads/:leadId
   updateLeadStatus: Handler = async (req, res, next) => {
     try {
       const campaignId = Number(req.params.campaignId)
@@ -50,6 +53,7 @@ export class campaignLeadsController {
     }
   }
 
+  //DELETE campaigns/:campaignId/leads/:leadId
   removeLead: Handler = async (req, res, next) => {
     try {
       const campaignId = Number(req.params.campaignId)
